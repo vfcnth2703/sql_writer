@@ -1,6 +1,5 @@
 # coding=utf-8
 import sys
-
 from var_dump import var_dump as vd
 import const
 from pprint import pprint as pp
@@ -39,14 +38,18 @@ class FileSelector:
         self.output_type = const.output_type
         self.input_type = const.input_type
         self.data = data
+        self.first_row = 0
+
 
     def select_header(self):
         if self.data[0].strip() == self.output_type:
-            return const.export_header_line
+            self.first_row = self.find_first_row()
+            return (self.first_row,const.output_header_line)
         if self.data[0].strip() == self.input_type:
-            return const.import_header_line
+            return (self.first_row,const.input_header_line)
 
-    def first_row(self):
+    def find_first_row(self):
+        global i
         for i, item in enumerate(self.data):
             if item.startswith(const.start_data):
                 break
@@ -92,7 +95,10 @@ def main():
     file_writer = FileWriter()
     file_reader = FileReader(file_checker)
     converter = Converter(file, file_reader, file_writer)
-    vd(converter.load_file())
+    converter.set_data()
+    data = converter.get_data()
+    file_selector  = FileSelector(data)
+    vd(file_selector.select_header())
     # pprint(converter.load_file())
 
 
