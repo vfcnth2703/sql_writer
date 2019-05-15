@@ -18,9 +18,36 @@ class Parse_engine():
     def set_data(self,data):
         self.file_info,self.data = data
 
+
+    def add_space(self, val):
+        """
+            Делает заданный отступ
+        """
+        return ' ' * val
+
+
+    def go_parse(self):
+        first_row,header = self.file_info
+        data = self.data[first_row:]
+        lines = []
+        lines.append(f'WITH R ({header})\n AS (\n')
+        for item in data:
+            line = '\', \''.join(item.replace(const.start_data,'').split(';')).strip()
+            line = f'{self.add_space(4)}select \'{line}\'\n'
+            lines.append(line)
+            if item != data[-1]:
+                line = f'{self.add_space(6)}union all\n'
+                lines.append(line)
+        line = ')\n\n'
+        lines.append(line)
+        line = f'{self.add_space(2)}Select * from R\n\n'
+        lines.append(line)
+        return lines
+
+
 class Converter:
     '''
-        Conver specific files into format Select into ...
+        Convert specific files into format Select into ...
     '''
 
     def __init__(self, file_name, file_reader, file_writer,parse_engine,file_selector):
@@ -83,7 +110,7 @@ class FileSelector:
             if item.startswith(const.start_data):
                 break
             else:
-                i = 0
+                i = 1
         return i
 
     def set_data(self,data):
@@ -108,9 +135,10 @@ class FileWriter:
         Write result file
     '''
 
-    def save(self, file_name, lines):
+
+    def save(self,file_name,lines):
         with open(file_name, 'w') as f:
-            f.writelines(self, lines)
+            f.writelines(lines)
 
 
 class FileChecker:
@@ -123,16 +151,15 @@ class FileChecker:
 
 
 def main():
-    file = 'import_small.csv'
-    # file = 'roma_data.csv'
+    # file = 'import_small.csv'
+    file = 'roma_data.csv'
     file_checker = FileChecker()
     file_writer = FileWriter()
     file_reader = FileReader(file_checker)
     parse_engine = Parse_engine()
     file_selector  = FileSelector()
     converter = Converter(file, file_reader, file_writer,parse_engine,file_selector)
-    vd(converter.file_selector.file_info)
-    # pprint(converter.load_file())
+    converter.file_writer.save('1.sql',converter.parse_engine.go_parse())
 
 
 if __name__ == '__main__':
