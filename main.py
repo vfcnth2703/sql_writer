@@ -15,6 +15,9 @@ class Parse_engine():
         self.data = None
 
 
+    def set_data(self,data):
+        self.file_info,self.data = data
+
 class Converter:
     '''
         Conver specific files into format Select into ...
@@ -28,6 +31,7 @@ class Converter:
         self.data = self.load_file()
         self.file_selector = file_selector
         self.selector_init()
+        self.parse_engine.set_data(self.packing_data())
 
 
 
@@ -37,8 +41,10 @@ class Converter:
         self.file_selector.header = self.file_selector.select_header()
         self.file_selector.file_info = (self.file_selector.first_row,self.file_selector.header)
 
+
     def load_file(self):
         return self.file_reader.read(self.file_name)
+
 
     def save_file(self):
         self.file_writer.write(self.file_name, self.lines)
@@ -46,6 +52,11 @@ class Converter:
 
     def get_data(self):
         return self.data
+
+
+    def packing_data (self):
+        return (self.file_selector.file_info, self.data)
+
 
 class FileSelector:
     '''
@@ -56,9 +67,6 @@ class FileSelector:
         self.output_type = const.output_type
         self.input_type = const.input_type
         self.data = None
-        # self.first_row = self.find_first_row()
-        # self.header = self.select_header()
-        # self.file_info = (self.first_row,self.header)
 
     def select_header(self):
         if self.data[0].strip() == self.output_type:
