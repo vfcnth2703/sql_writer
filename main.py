@@ -6,6 +6,14 @@ from pprint import pprint as pp
 import os.path
 
 
+class Parse_engine():
+    """
+        Main parser
+    """
+    def __init__(self):
+        pass
+
+
 class Converter:
     '''
         Conver specific files into format Select into ...
@@ -15,7 +23,8 @@ class Converter:
         self.file_name = file_name
         self.file_reader = file_reader
         self.file_writer = file_writer
-        self.data = None
+        self.data = self.set_data()
+
 
     def load_file(self):
         return self.file_reader.read(self.file_name)
@@ -24,7 +33,7 @@ class Converter:
         self.file_writer.write(self.file_name, self.lines)
 
     def set_data(self):
-        self.data = self.load_file()
+        return self.load_file()
 
     def get_data(self):
         return self.data
@@ -34,26 +43,28 @@ class FileSelector:
         Class for selecting engines
     '''
 
-    def __init__(self, data):
+    def __init__(self,data):
         self.output_type = const.output_type
         self.input_type = const.input_type
         self.data = data
-        self.first_row = 0
-
+        self.first_row = self.find_first_row()
+        self.file_info = (self.first_row,self.select_header())
 
     def select_header(self):
         if self.data[0].strip() == self.output_type:
-            self.first_row = self.find_first_row()
-            return (self.first_row,const.output_header_line)
+            return (const.output_header_line)
         if self.data[0].strip() == self.input_type:
-            return (self.first_row,const.input_header_line)
+            return (const.input_header_line)
 
     def find_first_row(self):
         global i
         for i, item in enumerate(self.data):
             if item.startswith(const.start_data):
                 break
+            else:
+                i = 0
         return i
+
 
 
 class FileReader:
@@ -91,14 +102,13 @@ class FileChecker:
 
 def main():
     file = 'import_small.csv'
+    # file = 'roma_data.csv'
     file_checker = FileChecker()
     file_writer = FileWriter()
     file_reader = FileReader(file_checker)
-    converter = Converter(file, file_reader, file_writer)
-    converter.set_data()
-    data = converter.get_data()
-    file_selector  = FileSelector(data)
-    vd(file_selector.select_header())
+    converter = Converter(file, file_reader, file_writer,)
+    file_selector  = FileSelector(converter.get_data())
+    vd(file_selector.file_info)
     # pprint(converter.load_file())
 
 
