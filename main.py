@@ -11,7 +11,8 @@ class Parse_engine():
         Main parser
     """
     def __init__(self):
-        pass
+        self.file_info = None
+        self.data = None
 
 
 class Converter:
@@ -19,12 +20,22 @@ class Converter:
         Conver specific files into format Select into ...
     '''
 
-    def __init__(self, file_name, file_reader, file_writer):
+    def __init__(self, file_name, file_reader, file_writer,parse_engine,file_selector):
         self.file_name = file_name
         self.file_reader = file_reader
         self.file_writer = file_writer
-        self.data = self.set_data()
+        self.parse_engine = parse_engine
+        self.data = self.load_file()
+        self.file_selector = file_selector
+        self.selector_init()
 
+
+
+    def selector_init(self):
+        self.file_selector.set_data(self.data)
+        self.file_selector.first_row = self.file_selector.find_first_row()
+        self.file_selector.header = self.file_selector.select_header()
+        self.file_selector.file_info = (self.file_selector.first_row,self.file_selector.header)
 
     def load_file(self):
         return self.file_reader.read(self.file_name)
@@ -32,8 +43,6 @@ class Converter:
     def save_file(self):
         self.file_writer.write(self.file_name, self.lines)
 
-    def set_data(self):
-        return self.load_file()
 
     def get_data(self):
         return self.data
@@ -43,18 +52,22 @@ class FileSelector:
         Class for selecting engines
     '''
 
-    def __init__(self,data):
+    def __init__(self):
         self.output_type = const.output_type
         self.input_type = const.input_type
-        self.data = data
-        self.first_row = self.find_first_row()
-        self.file_info = (self.first_row,self.select_header())
+        self.data = None
+        # self.first_row = self.find_first_row()
+        # self.header = self.select_header()
+        # self.file_info = (self.first_row,self.header)
 
     def select_header(self):
         if self.data[0].strip() == self.output_type:
             return (const.output_header_line)
-        if self.data[0].strip() == self.input_type:
+        elif self.data[0].strip() == self.input_type:
             return (const.input_header_line)
+        else:
+            sys.exit('File in wrong format')
+
 
     def find_first_row(self):
         global i
@@ -65,7 +78,8 @@ class FileSelector:
                 i = 0
         return i
 
-
+    def set_data(self,data):
+        self.data = data
 
 class FileReader:
     '''
@@ -106,9 +120,10 @@ def main():
     file_checker = FileChecker()
     file_writer = FileWriter()
     file_reader = FileReader(file_checker)
-    converter = Converter(file, file_reader, file_writer,)
-    file_selector  = FileSelector(converter.get_data())
-    vd(file_selector.file_info)
+    parse_engine = Parse_engine()
+    file_selector  = FileSelector()
+    converter = Converter(file, file_reader, file_writer,parse_engine,file_selector)
+    vd(converter.file_selector.file_info)
     # pprint(converter.load_file())
 
 
