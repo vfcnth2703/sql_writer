@@ -120,7 +120,6 @@ class FileReader:
     '''
         Reading files
     '''
-
     def __init__(self, file_checker):
         self.file_checker = file_checker
 
@@ -135,11 +134,15 @@ class FileWriter:
         Write result file
     '''
 
-
     def save(self,file_name,lines):
         with open(file_name, 'w') as f:
             f.writelines(lines)
 
+    def set_ext_to_file(self, file, ext = 'sql'):
+        """
+            Меняем расширение файла
+        """
+        return f'{os.path.splitext(file)[0]}.{ext}'
 
 class FileChecker:
     '''
@@ -151,15 +154,16 @@ class FileChecker:
 
 
 def main():
-    # file = 'import_small.csv'
-    file = 'roma_data.csv'
+    file = 'import_small.csv'
+    # file = 'roma_data.csv'
     file_checker = FileChecker()
     file_writer = FileWriter()
     file_reader = FileReader(file_checker)
     parse_engine = Parse_engine()
     file_selector  = FileSelector()
-    converter = Converter(file, file_reader, file_writer,parse_engine,file_selector)
-    converter.file_writer.save('1.sql',converter.parse_engine.go_parse())
+    con = Converter(file, file_reader, file_writer,parse_engine,file_selector)
+    writer = con.file_writer.set_ext_to_file
+    con.file_writer.save(writer(con.file_name),con.parse_engine.go_parse())
 
 
 if __name__ == '__main__':
