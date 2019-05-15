@@ -1,12 +1,10 @@
 # coding=utf-8
+import constants
 import sys
-from var_dump import var_dump as vd
-import const
-from pprint import pprint as pp
 import os.path
 
 
-class Parse_engine():
+class ParseEngine():
     """
         Main parser
     """
@@ -32,7 +30,7 @@ class Parse_engine():
         lines = []
         lines.append(f'WITH R ({header})\n AS (\n')
         for item in data:
-            line = '\', \''.join(item.replace(const.start_data,'').split(';')).strip()
+            line = '\', \''.join(item.replace(constants.start_data,'').split(';')).strip()
             line = f'{self.add_space(4)}select \'{line}\'\n'
             lines.append(line)
             if item != data[-1]:
@@ -91,15 +89,15 @@ class FileSelector:
     '''
 
     def __init__(self):
-        self.output_type = const.output_type
-        self.input_type = const.input_type
+        self.output_type = constants.output_type
+        self.input_type = constants.input_type
         self.data = None
 
     def select_header(self):
         if self.data[0].strip() == self.output_type:
-            return (const.output_header_line)
+            return (constants.output_header_line)
         elif self.data[0].strip() == self.input_type:
-            return (const.input_header_line)
+            return (constants.input_header_line)
         else:
             sys.exit('File in wrong format')
 
@@ -107,7 +105,7 @@ class FileSelector:
     def find_first_row(self):
         global i
         for i, item in enumerate(self.data):
-            if item.startswith(const.start_data):
+            if item.startswith(constants.start_data):
                 break
             else:
                 i = 1
@@ -159,7 +157,7 @@ def main():
     file_checker = FileChecker()
     file_writer = FileWriter()
     file_reader = FileReader(file_checker)
-    parse_engine = Parse_engine()
+    parse_engine = ParseEngine()
     file_selector  = FileSelector()
     con = Converter(file, file_reader, file_writer,parse_engine,file_selector)
     writer = con.file_writer.set_ext_to_file
