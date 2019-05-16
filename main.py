@@ -1,5 +1,5 @@
 # coding=utf-8
-import constants
+import my_const
 import sys
 import os.path
 
@@ -30,7 +30,7 @@ class ParseEngine():
         lines = []
         lines.append(f'WITH R ({header})\n AS (\n')
         for item in data:
-            line = '\', \''.join(item.replace(constants.start_data,'').split(';')).strip()
+            line = '\', \''.join(item.replace(my_const.start_data,'').split(';')).strip()
             line = f'{self.add_space(4)}select \'{line}\'\n'
             lines.append(line)
             if item != data[-1]:
@@ -89,15 +89,15 @@ class FileSelector:
     '''
 
     def __init__(self):
-        self.output_type = constants.output_type
-        self.input_type = constants.input_type
+        self.output_type = my_const.output_type
+        self.input_type = my_const.input_type
         self.data = None
 
     def select_header(self):
         if self.data[0].strip() == self.output_type:
-            return (constants.output_header_line)
+            return (my_const.output_header_line)
         elif self.data[0].strip() == self.input_type:
-            return (constants.input_header_line)
+            return (my_const.input_header_line)
         else:
             sys.exit('File in wrong format')
 
@@ -105,7 +105,7 @@ class FileSelector:
     def find_first_row(self):
         global i
         for i, item in enumerate(self.data):
-            if item.startswith(constants.start_data):
+            if item.startswith(my_const.start_data):
                 break
             else:
                 i = 1
