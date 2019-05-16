@@ -152,7 +152,8 @@ class FileChecker:
 
 
 def main():
-    file = 'import_small.csv'
+    file = sys.argv[-1]
+    # file = 'import_small.csv'
     # file = 'roma_data.csv'
     file_checker = FileChecker()
     file_writer = FileWriter()
