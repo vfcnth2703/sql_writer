@@ -3,3 +3,4 @@ output_header_line = "[talon_nomer],[task_head_id],[prof_priority_id],[firm_firm
 input_type = '%EXPORT_PROF_ASCN_SYSTEM%'
 output_type = '%PORTABLE_PROF_ASCN_SYSTEM%'
 start_data = '%DATA%'
+

@@ -8,14 +8,13 @@ class ParseEngine():
     """
         Main parser
     """
+
     def __init__(self):
         self.file_info = None
         self.data = None
 
-
-    def set_data(self,data):
-        self.file_info,self.data = data
-
+    def set_data(self, data):
+        self.file_info, self.data = data
 
     def add_space(self, val):
         """
@@ -23,14 +22,13 @@ class ParseEngine():
         """
         return ' ' * val
 
-
     def go_parse(self):
-        first_row,header = self.file_info
+        first_row, header = self.file_info
         data = self.data[first_row:]
         lines = []
         lines.append(f'WITH R ({header})\n AS (\n')
         for item in data:
-            line = '\', \''.join(item.replace(my_const.start_data,'').split(';')).strip()
+            line = '\', \''.join(item.replace(my_const.start_data, '').split(';')).strip()
             line = f'{self.add_space(4)}select \'{line}\'\n'
             lines.append(line)
             if item != data[-1]:
@@ -43,12 +41,29 @@ class ParseEngine():
         return lines
 
 
+class FileCollector:
+    def __init__(self):
+        self.files = []
+
+    def collect_files(self, *args):
+        """
+            Делает список файлов с заданными расширениями в
+            текущей директории.
+        """
+        args = tuple(['.' + str(item).lower() for item in args])
+        home_dir = os.getcwd()
+        for file in sorted(os.listdir(home_dir)):
+            if file.lower().endswith(args):
+                self.files.append(home_dir + '\\' + file)
+        return self.files
+
+
 class Converter:
     '''
         Convert specific files into format Select into ...
     '''
 
-    def __init__(self, file_name, file_reader, file_writer,parse_engine,file_selector):
+    def __init__(self, file_name, file_reader, file_writer, parse_engine, file_selector):
         self.file_name = file_name
         self.file_reader = file_reader
         self.file_writer = file_writer
@@ -58,28 +73,22 @@ class Converter:
         self.selector_init()
         self.parse_engine.set_data(self.packing_data())
 
-
-
     def selector_init(self):
         self.file_selector.set_data(self.data)
         self.file_selector.first_row = self.file_selector.find_first_row()
         self.file_selector.header = self.file_selector.select_header()
-        self.file_selector.file_info = (self.file_selector.first_row,self.file_selector.header)
-
+        self.file_selector.file_info = (self.file_selector.first_row, self.file_selector.header)
 
     def load_file(self):
         return self.file_reader.read(self.file_name)
 
-
     def save_file(self):
         self.file_writer.write(self.file_name, self.lines)
-
 
     def get_data(self):
         return self.data
 
-
-    def packing_data (self):
+    def packing_data(self):
         return (self.file_selector.file_info, self.data)
 
 
@@ -101,7 +110,6 @@ class FileSelector:
         else:
             sys.exit('File in wrong format')
 
-
     def find_first_row(self):
         global i
         for i, item in enumerate(self.data):
@@ -111,13 +119,15 @@ class FileSelector:
                 i = 1
         return i
 
-    def set_data(self,data):
+    def set_data(self, data):
         self.data = data
+
 
 class FileReader:
     '''
         Reading files
     '''
+
     def __init__(self, file_checker):
         self.file_checker = file_checker
 
@@ -132,37 +142,38 @@ class FileWriter:
         Write result file
     '''
 
-    def save(self,file_name,lines):
+    def save(self, file_name, lines):
         with open(file_name, 'w') as f:
             f.writelines(lines)
 
-    def set_ext_to_file(self, file, ext = 'sql'):
+    def set_ext_to_file(self, file, ext='sql'):
         """
             Меняем расширение файла
         """
         return f'{os.path.splitext(file)[0]}.{ext}'
 
+
 class FileChecker:
     '''
         Checking existing target file
     '''
+
     def check(self, file_name):
         if not os.path.exists(file_name):
             sys.exit('File not found')
 
 
 def main():
-    file = sys.argv[-1]
-    # file = 'import_small.csv'
-    # file = 'roma_data.csv'
+    file_collector = FileCollector()
     file_checker = FileChecker()
     file_writer = FileWriter()
     file_reader = FileReader(file_checker)
     parse_engine = ParseEngine()
-    file_selector  = FileSelector()
-    con = Converter(file, file_reader, file_writer,parse_engine,file_selector)
-    writer = con.file_writer.set_ext_to_file
-    con.file_writer.save(writer(con.file_name),con.parse_engine.go_parse())
+    file_selector = FileSelector()
+    for file in file_collector.collect_files('csv'):
+        con = Converter(file, file_reader, file_writer, parse_engine, file_selector)
+        writer = con.file_writer.set_ext_to_file
+        con.file_writer.save(writer(con.file_name), con.parse_engine.go_parse())
 
 
 if __name__ == '__main__':
